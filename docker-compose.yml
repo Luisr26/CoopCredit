@@ -1,0 +1,70 @@
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: coopcredit-postgres
+    environment:
+      POSTGRES_DB: coopcredit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - coopcredit-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Servicio Mock de evaluación de riesgo
+  risk-central-mock-service:
+    build:
+      context: ./risk-central-mock-service
+      dockerfile: Dockerfile
+    container_name: risk-central-mock
+    ports:
+      - "8081:8081"
+    networks:
+      - coopcredit-network
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/risk-evaluation/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Servicio principal de solicitudes de crédito
+  credit-application-service:
+    build:
+      context: ./credit-application-service
+      dockerfile: Dockerfile
+    container_name: credit-application
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/coopcredit
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      COOPCREDIT_RISK_CENTRAL_URL: http://risk-central-mock-service:8081
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      risk-central-mock-service:
+        condition: service_started
+    networks:
+      - coopcredit-network
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  coopcredit-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
