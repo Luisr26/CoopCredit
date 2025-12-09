@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  flyway:
+    enabled: false
+
+coopcredit:
+  jwt:
+    secret: VGVzdFNlY3JldEtleUZvckpXVFRva2VuR2VuZXJhdGlvbkFuZFZhbGlkYXRpb25UZXN0MTIzNDU2Nzg5MA==
+    expiration: 86400000
+  risk-central:
+    url: http://localhost:8081
+  politicas:
+    relacion-cuota-ingreso-maxima: 0.40
+    multiplicador-salario-monto-maximo: 5
+    antiguedad-minima-meses: 6
+
+logging:
+  level:
+    root: WARN
+    com.coopcredit.credit: DEBUG
