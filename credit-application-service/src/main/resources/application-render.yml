@@ -1,0 +1,58 @@
+# Render.com Production Profile
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000
+
+# Risk Central Service URL
+coopcredit:
+  risk-central:
+    url: ${COOPCREDIT_RISK_CENTRAL_URL:http://localhost:8081}
+  politicas:
+    relacion-cuota-ingreso-maxima: 0.40
+    multiplicador-salario-monto-maximo: 5
+    antiguedad-minima-meses: 6
+
+# Actuator - expose health for Render
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.coopcredit: INFO
+    org.springframework.security: WARN

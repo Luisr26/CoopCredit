@@ -1,0 +1,54 @@
+# Render Blueprint - CoopCredit Backend Services
+# https://render.com/docs/blueprint-spec
+
+services:
+  # Main Credit Application Service
+  - type: web
+    name: coopcredit-api
+    runtime: docker
+    dockerfilePath: ./credit-application-service/Dockerfile
+    dockerContext: ./credit-application-service
+    region: oregon
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: coopcredit-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: coopcredit-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: coopcredit-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOPCREDIT_RISK_CENTRAL_URL
+        value: https://coopcredit-risk-central.onrender.com
+      - key: JAVA_OPTS
+        value: -Xmx256m -Xms128m
+
+  # Risk Central Mock Service
+  - type: web
+    name: coopcredit-risk-central
+    runtime: docker
+    dockerfilePath: ./risk-central-mock-service/Dockerfile
+    dockerContext: ./risk-central-mock-service
+    region: oregon
+    plan: free
+    healthCheckPath: /risk-evaluation/health
+    envVars:
+      - key: JAVA_OPTS
+        value: -Xmx128m -Xms64m
+
+databases:
+  - name: coopcredit-db
+    databaseName: coopcredit
+    user: coopcredit_user
+    region: oregon
+    plan: free
