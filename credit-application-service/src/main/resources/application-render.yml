@@ -54,3 +54,11 @@ logging:
     root: INFO
     com.coopcredit: INFO
     org.springframework.security: WARN
+
+# Swagger/OpenAPI - forzar URL del servidor
+springdoc:
+  swagger-ui:
+    url: /v3/api-docs
+  servers:
+    - url: ${RENDER_EXTERNAL_URL:https://coopcredit-1.onrender.com}
+      description: Render Production
