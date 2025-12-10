@@ -7,8 +7,12 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 /**
  * Configuración de OpenAPI/Swagger con seguridad JWT.
@@ -16,11 +20,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+    @Value("${RENDER_EXTERNAL_URL:}")
+    private String renderUrl;
+
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "Bearer Authentication";
 
-        return new OpenAPI()
+        OpenAPI openAPI = new OpenAPI()
                 .info(new Info()
                         .title("CoopCredit API")
                         .version("1.0.0")
@@ -39,5 +46,14 @@ public class OpenApiConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
                                 .description("Ingresa tu token JWT. Formato: solo el token (sin 'Bearer ')")));
+
+        // Configurar servidor dinámicamente
+        if (renderUrl != null && !renderUrl.isEmpty()) {
+            openAPI.servers(List.of(
+                    new Server().url(renderUrl).description("Render Production")
+            ));
+        }
+
+        return openAPI;
     }
 }
