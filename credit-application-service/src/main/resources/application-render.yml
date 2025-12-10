@@ -26,13 +26,11 @@ spring:
     enabled: true
     baseline-on-migrate: true
 
-# JWT Configuration
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: 86400000
-
-# Risk Central Service URL
+# CoopCredit Configuration
 coopcredit:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000
   risk-central:
     url: ${COOPCREDIT_RISK_CENTRAL_URL:http://localhost:8081}
   politicas:
